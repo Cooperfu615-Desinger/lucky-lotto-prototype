@@ -15,6 +15,8 @@ const i18n = {
     filters_df: "每日",
     badge_open: "開放",
     badge_closed: "封盤 (截單)",
+    badge_drawing: "開獎中",
+    badge_result: "結果",
     next_draw_in: "距下期",
     details: "詳情",
     bet: "投注",
@@ -68,6 +70,8 @@ const i18n = {
     filters_df: "Daily",
     badge_open: "Open",
     badge_closed: "Closed (cutoff)",
+    badge_drawing: "Drawing",
+    badge_result: "Result",
     next_draw_in: "Next draw in",
     details: "Details",
     bet: "Bet",
@@ -171,8 +175,26 @@ function isClosed(ts){ return (ts - Date.now()) <= 60000; }
 function rangeOfModel(model){ if(model==='49-6B'||model==='49-7') return 49; if(model==='36-5') return 36; return 49; }
 function kOfModel(model){ if(model==='49-6B') return 7; if(model==='49-7') return 7; if(model==='36-5') return 5; return 6; }
 function pickDistinct(n,k){ const a=Array.from({length:n},(_,i)=>i+1); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a.slice(0,k).sort((a,b)=>a-b); }
-function getHistory(code, model){ const key=`ln_hist_${code}`; let hist; try{ hist=JSON.parse(localStorage.getItem(key)||'[]'); }catch(e){ hist=[]; } if(!hist||hist.length<20){ const N=rangeOfModel(model); const K=kOfModel(model); hist=Array.from({length:20},()=>pickDistinct(N,K)); localStorage.setItem(key, JSON.stringify(hist)); } return hist; }
-function hotColdSelect(game, want='hot', count=3){ const hist=getHistory(game.code, game.model); const N=rangeOfModel(game.model); const freq=Array.from({length:N+1},()=>0); hist.forEach(d=>d.forEach(n=>freq[n]++)); const ent=[]; for(let i=1;i<=N;i++){ ent.push({n:i,c:freq[i]}); } ent.sort((a,b)=> want==='hot' ? (b.c-a.c || a.n-b.n) : (a.c-b.c || a.n-b.n)); return ent.slice(0,count).map(e=>e.n).sort((a,b)=>a-b); }
+
+// Deterministic pseudo draw from seed (game.code + nextDrawAt)
+function seededDraw(game){
+  const n = rangeOfModel(game.model);
+  const k = kOfModel(game.model);
+  // Simple LCG based on seed numeric
+  const seedStr = game.code + String(game.nextDrawAt);
+  let seed = 0;
+  for (let i=0;i<seedStr.length;i++) seed = (seed*131 + seedStr.charCodeAt(i)) >>> 0;
+  function rnd(){ seed = (1664525 * seed + 1013904223) >>> 0; return seed/4294967296; }
+  const pool = Array.from({length:n}, (_,i)=>i+1);
+  const out = [];
+  for(let i=0;i<k;i++){
+    const idx = Math.floor(rnd()*pool.length);
+    out.push(pool[idx]);
+    pool.splice(idx,1);
+  }
+  out.sort((a,b)=>a-b);
+  return out;
+}
 
 async function loadGames(){ const res = await fetch('data/games.json'); const arr = await res.json(); state.games = arr.map(g=>({...g, nextDrawAt: computeNextDraw(g.freq)})); state.gameMap = Object.fromEntries(state.games.map(g=>[g.code,g])); }
 
@@ -185,7 +207,6 @@ function refreshChrome(){
   $('#total-stakes-label').textContent = t('total_stakes');
   $('#submit-bets').textContent = t('submit_all');
   $('#lang-toggle').textContent = (state.lang==='zh' ? 'EN' : '中');
-  // Bet Slip badge text updated elsewhere with count
   updateSlipBadge();
 }
 
@@ -206,7 +227,7 @@ function renderLobby(){
   const filt = (g)=> state.filter==='all' ? true : state.filter==='hf' ? (g.freq==='5m'||g.freq==='10m') : state.filter==='mf' ? (g.freq==='30m'||g.freq==='60m') : (g.freq==='daily'||g.freq==='daily2');
 
   state.games.filter(filt).forEach(g=>{
-    const card = document.createElement('div'); card.className='card';
+    const card = document.createElement('div'); card.className='card'; card.dataset.code=g.code;
     const closed = isClosed(g.nextDrawAt);
     const nameMain = state.lang==='zh' ? g.name : g.name_en;
     const nameSub = state.lang==='zh' ? g.name_en : g.name;
@@ -215,16 +236,26 @@ function renderLobby(){
       <div class="badges">
         <span class="badge">${g.model}</span>
         <span class="badge">${g.range} • draw ${g.draw}</span>
-        <span class="badge">${badgeForFreq(g.freq)}</span>
+        <span class="badge" data-freq="${g.code}">${badgeForFreq(g.freq)}</span>
         <span class="badge ${closed?'closed':''}" data-closed="${g.code}">${closed?t('badge_closed'):t('badge_open')}</span>
       </div>
-      <div class="row">
-        <span class="muted">${t('next_draw_in')}</span>
-        <strong class="countdown" data-code="${g.code}">--:--</strong>
+
+      <div class="normal" data-normal="${g.code}">
+        <div class="row">
+          <span class="muted">${t('next_draw_in')}</span>
+          <strong class="countdown" data-code="${g.code}">--:--</strong>
+        </div>
+        <div class="footer-actions">
+          <button class="btn" data-open="${g.code}">${t('details')}</button>
+          <button class="btn primary" data-bet="${g.code}">${t('bet')}</button>
+        </div>
       </div>
-      <div class="footer-actions">
-        <button class="btn" data-open="${g.code}">${t('details')}</button>
-        <button class="btn primary" data-bet="${g.code}">${t('bet')}</button>
+
+      <div class="reveal" data-reveal="${g.code}">
+        <div class="row">
+          <span class="badge" data-reveal-badge="${g.code}">${t('badge_drawing')}</span>
+          <div class="ball-row" data-balls="${g.code}"></div>
+        </div>
       </div>
     `;
     grid.appendChild(card);
@@ -239,19 +270,90 @@ function renderLobby(){
 let tickTimer;
 function startTick(){
   if (tickTimer) clearInterval(tickTimer);
+
+  function ensureRevealState(g){
+    if (!g._reveal) g._reveal = { phase:'idle', shown:0, lastAt:0, result:[], holdUntil:0 };
+  }
+
   function tick(){
     state.games.forEach(g=>{
-      const el=$(`.countdown[data-code="${g.code}"]`); const st=$(`.badge[data-closed="${g.code}"]`);
-      if(!el||!st) return;
-      el.textContent=fmtCountdown(g.nextDrawAt);
-      el.classList.remove('warn','danger'); const cls=countdownClass(g.nextDrawAt); if(cls) el.classList.add(cls);
-      const closed=isClosed(g.nextDrawAt); st.textContent=closed?t('badge_closed'):t('badge_open'); st.classList.toggle('closed', closed);
-      if(Date.now()>=g.nextDrawAt){ g.nextDrawAt=computeNextDraw(g.freq); }
+      ensureRevealState(g);
+      const el=$(`.countdown[data-code="${g.code}"]`);
+      const st=$(`.badge[data-closed="${g.code}"]`);
+      const normal=$(`.normal[data-normal="${g.code}"]`);
+      const reveal=$(`.reveal[data-reveal="${g.code}"]`);
+      const balls=$(`.ball-row[data-balls="${g.code}"]`);
+      const rb=$(`span[data-reveal-badge="${g.code}"]`);
+      if(!el || !st || !normal || !reveal || !balls || !rb) return;
+
+      // Only apply lobby reveal to the test game
+      const isTestGame = g.code === 'ZA01-TBL';
+
+      if (isTestGame){
+        if (g._reveal.phase==='idle'){
+          // normal countdown until time reaches
+          el.textContent=fmtCountdown(g.nextDrawAt);
+          el.classList.remove('warn','danger'); const cls=countdownClass(g.nextDrawAt); if(cls) el.classList.add(cls);
+          const closed=isClosed(g.nextDrawAt); st.textContent=closed?t('badge_closed'):t('badge_open'); st.classList.toggle('closed', closed);
+          if (Date.now() >= g.nextDrawAt){
+            // start drawing
+            g._reveal.phase='drawing';
+            g._reveal.result = seededDraw(g);
+            g._reveal.shown = 0;
+            g._reveal.lastAt = Date.now()-1000; // immediate first ball
+            normal.style.display='none';
+            reveal.classList.add('active');
+            rb.textContent = t('badge_drawing');
+            balls.innerHTML='';
+          }
+        } else if (g._reveal.phase==='drawing'){
+          // add balls every 500ms
+          if (Date.now() - g._reveal.lastAt >= 500){
+            const val = g._reveal.result[g._reveal.shown];
+            const node = document.createElement('div');
+            node.className = 'ball bounce' + ((g.model==='49-6B' && g._reveal.shown===g._reveal.result.length-1)?' bonus':'');
+            node.textContent = val;
+            balls.appendChild(node);
+            g._reveal.shown++;
+            g._reveal.lastAt = Date.now();
+            if (g._reveal.shown >= g._reveal.result.length){
+              g._reveal.phase='hold';
+              g._reveal.holdUntil = Date.now() + 30000; // show 30s
+              rb.textContent = t('badge_result');
+            }
+          }
+          st.textContent = t('badge_drawing'); st.classList.remove('closed');
+        } else if (g._reveal.phase==='hold'){
+          // display result until holdUntil
+          st.textContent = t('badge_result'); st.classList.remove('closed');
+          if (Date.now() >= g._reveal.holdUntil){
+            // reset for next round
+            g.nextDrawAt = computeNextDraw(g.freq);
+            g._reveal = { phase:'idle', shown:0, lastAt:0, result:[], holdUntil:0 };
+            reveal.classList.remove('active');
+            normal.style.display='block';
+            balls.innerHTML='';
+            rb.textContent = t('badge_drawing');
+          }
+        }
+      } else {
+        // Non-test games: normal behavior (roll forward when pass deadline)
+        el.textContent=fmtCountdown(g.nextDrawAt);
+        el.classList.remove('warn','danger'); const cls=countdownClass(g.nextDrawAt); if(cls) el.classList.add(cls);
+        const closed=isClosed(g.nextDrawAt); st.textContent=closed?t('badge_closed'):t('badge_open'); st.classList.toggle('closed', closed);
+        if (Date.now() >= g.nextDrawAt) g.nextDrawAt = computeNextDraw(g.freq);
+      }
     });
   }
-  tick(); tickTimer=setInterval(tick,1000);
+  tick(); tickTimer=setInterval(tick,250);
 }
+
 function badgeForFreq(freq){ return ({'5m':'Every 5m','10m':'Every 10m','30m':'Every 30m','60m':'Hourly','daily2':'Twice Daily','daily':'Daily'})[freq]||freq; }
+
+/* ---- Betting Panel / Slip / Active / History from v3 (shortened for brevity) ---- */
+/* Full implementations included to keep prototype usable */
+
+function rangeOfModel(model){ if(model==='49-6B'||model==='49-7') return 49; if(model==='36-5') return 36; return 49; } // duplicate guard
 
 function openBetPanel(game){
   $('#modal-title').textContent = state.lang==='zh' ? `${game.name} (${game.name_en})` : `${game.name_en} (${game.name})`;
@@ -302,7 +404,7 @@ function openBetPanel(game){
   const compat = $('#compat', panelRight);
   state.games.filter(g=>g.model===game.model).forEach(g2=>{
     const wrap=document.createElement('label'); wrap.style.display='flex'; wrap.style.alignItems='center'; wrap.style.gap='8px'; wrap.style.margin='4px 0';
-    const nm = state.lang==='zh' ? g2.name_en : g2.name_en; // show English in list for clarity
+    const nm = g2.name_en;
     wrap.innerHTML=`<input type="checkbox" value="${g2.code}" ${g2.code===game.code?'checked':''}> <span>${nm}</span> <span class="small muted">(${badgeForFreq(g2.freq)})</span>`;
     compat.appendChild(wrap);
   });
@@ -350,10 +452,10 @@ function renderSlipList(){
   state.slip.forEach((it,idx)=>{
     total += (it.stake||0);
     const closed=isClosed(it.nextDrawAt);
-    const nameMain = state.lang==='zh' ? it.name_en : it.name_en; // keep EN main in slip for clarity
+    const nameMain = it.name_en;
     const item = document.createElement('div'); item.className='slip-item' + (closed||!it.stake?' error':'');
     item.innerHTML = `
-      <div class="slip-row"><strong>${nameMain}</strong><span class="small">${state.lang==='zh'?it.name:it.name} • ${it.market}</span></div>
+      <div class="slip-row"><strong>${nameMain}</strong><span class="small">${it.name} • ${it.market}</span></div>
       <div class="slip-row"><span class="muted">${t('numbers','')}</span><span>${(it.numbers||[]).join(', ')||'-'}</span></div>
       <div class="slip-row">
         <label>${t('stake')}: <input data-idx="${idx}" class="stake-input" type="number" min="1" step="1" value="${it.stake||0}"></label>
@@ -404,9 +506,9 @@ $('#submit-bets').onclick = ()=>{
 function renderActive(){
   const c=document.createElement('div'); c.innerHTML=`<h2>${t('nav_active')}</h2><div class="grid cols-4" id="active-grid"></div>`; const grid=$('#active-grid',c);
   if(!state.active.length){ grid.innerHTML=`<div class="card">${t('active_empty')} — <a href="#/lobby">${t('nav_lobby')}</a></div>`; }
-  else state.active.forEach((it,idx)=>{ const card=document.createElement('div'); card.className='card'; const nameMain=state.lang==='zh'?it.name_en:it.name_en; card.innerHTML=`
+  else state.active.forEach((it,idx)=>{ const card=document.createElement('div'); card.className='card'; const nameMain=it.name_en; card.innerHTML=`
       <div class="title">${nameMain}</div>
-      <div class="small">${state.lang==='zh'?it.name:it.name} • ${it.market}</div>
+      <div class="small">${it.name} • ${it.market}</div>
       <div class="small">Numbers: ${(it.numbers||[]).join(', ')||'-'}</div>
       <div class="row"><span class="muted">${t('next_draw_in')}</span><strong class="countdown ${countdownClass(it.nextDrawAt)}" data-active="${idx}">${fmtCountdown(it.nextDrawAt)}</strong></div>`; grid.appendChild(card); });
   $('#app').innerHTML=''; $('#app').appendChild(c);
@@ -423,7 +525,7 @@ function renderHistory(){
   loadHistory();
   const c=document.createElement('div'); c.innerHTML=`<h2>${t('nav_history')}</h2><div class="grid cols-4" id="hist-grid"></div>`; const grid=$('#hist-grid',c);
   if(!state.history.length){ grid.innerHTML=`<div class="card">${t('history_empty')}</div>`; }
-  else state.history.slice().reverse().forEach(it=>{ const card=document.createElement('div'); card.className='card'; const nameMain=state.lang==='zh'?it.name_en:it.name_en; card.innerHTML=`
+  else state.history.slice().reverse().forEach(it=>{ const card=document.createElement('div'); card.className='card'; const nameMain=it.name_en; card.innerHTML=`
       <div class="title">${nameMain} <span class="small">(${it.market})</span></div>
       <div class="small">Numbers: ${(it.numbers||[]).join(', ')||'-'}</div>
       <div class="row"><span class="muted">${t('payout')}</span><strong>R ${Number(it.payout||0).toFixed(2)}</strong></div>`; grid.appendChild(card); });
@@ -438,3 +540,7 @@ $('#lang-toggle').onclick = ()=> setLang(state.lang==='zh' ? 'en' : 'zh');
 
 async function init(){ loadSlip(); loadHistory(); await loadGames(); refreshChrome(); renderRoute(); updateSlipBadge(); }
 init();
+
+/* Helpers for hot/cold */
+function getHistory(code, model){ const key=`ln_hist_${code}`; let hist; try{ hist=JSON.parse(localStorage.getItem(key)||'[]'); }catch(e){ hist=[]; } if(!hist||hist.length<20){ const N=rangeOfModel(model); const K=kOfModel(model); hist=Array.from({length:20},()=>pickDistinct(N,K)); localStorage.setItem(key, JSON.stringify(hist)); } return hist; }
+function hotColdSelect(game, want='hot', count=3){ const hist=getHistory(game.code, game.model); const N=rangeOfModel(game.model); const freq=Array.from({length:N+1},()=>0); hist.forEach(d=>d.forEach(n=>freq[n]++)); const ent=[]; for(let i=1;i<=N;i++){ ent.push({n:i,c:freq[i]}); } ent.sort((a,b)=> want==='hot' ? (b.c-a.c || a.n-b.n) : (a.c-b.c || a.n-b.n)); return ent.slice(0,count).map(e=>e.n).sort((a,b)=>a-b); }

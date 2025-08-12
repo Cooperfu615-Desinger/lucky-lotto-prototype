@@ -28,6 +28,17 @@ nav a { margin-right:14px; }
 .filter { padding:6px 10px; border:1px solid var(--border); border-radius:10px; background:#14182a; cursor:pointer; color:var(--muted); }
 .filter.active { color:#fff; border-color:#42518a; background:#1b2240; }
 
+/* Reveal area in card */
+.reveal { display:none; }
+.reveal.active { display:block; }
+.reveal .row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.ball-row { display:flex; gap:6px; flex-wrap:wrap; }
+.ball { width:28px; height:28px; border-radius:50%; border:1px solid var(--border); background:#10162e;
+        display:inline-flex; align-items:center; justify-content:center; font-size:13px; }
+.ball.bonus { border-color: var(--accent); }
+.bounce { animation: b 0.45s ease-out 2; }
+@keyframes b { 0%{ transform: translateY(0); } 50%{ transform: translateY(-3px);} 100%{ transform: translateY(0);} }
+
 .drawer { position:fixed; right:0; top:0; width:440px; height:100vh; background:#0d1224; border-left:1px solid var(--border); display:flex; flex-direction:column; }
 .drawer.hidden { display:none; }
 .drawer-header, .drawer-footer { padding:14px; border-bottom:1px solid var(--border); }
