@@ -1,41 +1,39 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lucky Numbers SA — Prototype v2</title>
+  <title>Lucky Numbers SA — Prototype</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
   <header class="app-header">
-    <h1>Lucky Numbers — SA Prototype v2</h1>
+    <h1 id="title">Lucky Numbers — SA Prototype</h1>
     <nav>
-      <a href="#/lobby">Lobby</a>
-      <a href="#/active">Active Bets</a>
-      <a href="#/history">Bet History</a>
+      <a href="#/lobby" id="nav-lobby">Lobby</a>
+      <a href="#/active" id="nav-active">Active Bets</a>
+      <a href="#/history" id="nav-history">Bet History</a>
       <button id="open-slip" class="btn primary">Bet Slip (0)</button>
+      <button id="lang-toggle" class="btn" title="Switch Language">EN / 中</button>
     </nav>
   </header>
 
   <main id="app"></main>
 
-  <!-- Toasts -->
-  <div id="toast-container" class="toasts"></div>
+  <div id="toasts" class="toasts"></div>
 
-  <!-- Bet Slip Drawer -->
   <div id="slip-drawer" class="drawer hidden">
     <div class="drawer-header">
-      <h2>Bet Slip (Pending)</h2>
+      <h2 id="slip-title">Bet Slip (Pending)</h2>
       <button id="close-slip" class="icon-btn">✕</button>
     </div>
     <div id="slip-list" class="slip-list"></div>
     <div class="drawer-footer">
-      <div class="totals"><span>Total Stakes:</span> <strong id="total-stake">R 0.00</strong></div>
+      <div class="totals"><span id="total-stakes-label">Total Stakes:</span> <strong id="total-stake">R 0.00</strong></div>
       <button id="submit-bets" class="btn success">Submit All Bets</button>
     </div>
   </div>
 
-  <!-- Modal for Betting Panel -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">

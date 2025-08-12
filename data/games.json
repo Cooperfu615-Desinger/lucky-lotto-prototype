@@ -5,7 +5,8 @@
     "name_en": "Table Mountain Peak",
     "freq": "5m",
     "range": "1–49",
-    "draw": "7 (incl. bonus)"
+    "draw": "6+bonus",
+    "model": "49-6B"
   },
   {
     "code": "ZA02-ZUL",
@@ -13,7 +14,8 @@
     "name_en": "Zulu Warrior",
     "freq": "5m",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   },
   {
     "code": "ZA03-MAN",
@@ -21,7 +23,8 @@
     "name_en": "Mandela Glory",
     "freq": "5m",
     "range": "1–49",
-    "draw": "6+bonus"
+    "draw": "6+bonus",
+    "model": "49-6B"
   },
   {
     "code": "ZA04-SHK",
@@ -29,7 +32,8 @@
     "name_en": "Shaka Dynasty",
     "freq": "5m",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   },
   {
     "code": "ZA05-ZUD",
@@ -37,7 +41,8 @@
     "name_en": "Zulu Dance Lotto",
     "freq": "10m",
     "range": "1–49",
-    "draw": "6+bonus"
+    "draw": "6+bonus",
+    "model": "49-6B"
   },
   {
     "code": "ZA06-HER",
@@ -45,7 +50,8 @@
     "name_en": "Heritage Day Lotto",
     "freq": "10m",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   },
   {
     "code": "ZA07-CPC",
@@ -53,7 +59,8 @@
     "name_en": "Cape Carnival Lotto",
     "freq": "10m",
     "range": "1–49",
-    "draw": "7"
+    "draw": "7",
+    "model": "49-7"
   },
   {
     "code": "ZA08-HRV",
@@ -61,7 +68,8 @@
     "name_en": "Harvest Festival Lotto",
     "freq": "10m",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   },
   {
     "code": "ZA09-TSS",
@@ -69,7 +77,8 @@
     "name_en": "Table Mountain Sunset",
     "freq": "30m",
     "range": "1–49",
-    "draw": "6+bonus"
+    "draw": "6+bonus",
+    "model": "49-6B"
   },
   {
     "code": "ZA10-KRG",
@@ -77,7 +86,8 @@
     "name_en": "Kruger Lion Lotto",
     "freq": "30m",
     "range": "1–49",
-    "draw": "7"
+    "draw": "7",
+    "model": "49-7"
   },
   {
     "code": "ZA11-DBN",
@@ -85,7 +95,8 @@
     "name_en": "Durban Waves",
     "freq": "30m",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   },
   {
     "code": "ZA12-AVG",
@@ -93,7 +104,8 @@
     "name_en": "Augrabies Falls Lotto",
     "freq": "30m",
     "range": "1–49",
-    "draw": "7"
+    "draw": "7",
+    "model": "49-7"
   },
   {
     "code": "ZA13-JNB",
@@ -101,7 +113,8 @@
     "name_en": "Johannesburg Nights",
     "freq": "30m",
     "range": "1–49",
-    "draw": "6+bonus"
+    "draw": "6+bonus",
+    "model": "49-6B"
   },
   {
     "code": "ZA14-CPT",
@@ -109,7 +122,8 @@
     "name_en": "Cape Harbour Lotto",
     "freq": "30m",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   },
   {
     "code": "ZA15-SOW",
@@ -117,7 +131,8 @@
     "name_en": "Soweto Rhythm",
     "freq": "60m",
     "range": "1–49",
-    "draw": "6+bonus"
+    "draw": "6+bonus",
+    "model": "49-6B"
   },
   {
     "code": "ZA16-RAC",
@@ -125,7 +140,8 @@
     "name_en": "South Africa Horse Racing",
     "freq": "60m",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   },
   {
     "code": "ZA17-LIO",
@@ -133,7 +149,8 @@
     "name_en": "Lion King Lotto",
     "freq": "60m",
     "range": "1–49",
-    "draw": "7"
+    "draw": "7",
+    "model": "49-7"
   },
   {
     "code": "ZA18-RHI",
@@ -141,7 +158,8 @@
     "name_en": "Rhino Lotto",
     "freq": "60m",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   },
   {
     "code": "ZA19-ELE",
@@ -149,7 +167,8 @@
     "name_en": "Elephant Lotto",
     "freq": "60m",
     "range": "1–49",
-    "draw": "6+bonus"
+    "draw": "6+bonus",
+    "model": "49-6B"
   },
   {
     "code": "ZA20-BUF",
@@ -157,7 +176,8 @@
     "name_en": "Buffalo Lotto",
     "freq": "60m",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   },
   {
     "code": "ZA21-LEO",
@@ -165,7 +185,8 @@
     "name_en": "Leopard Shadow Lotto",
     "freq": "daily2",
     "range": "1–49",
-    "draw": "7"
+    "draw": "7",
+    "model": "49-7"
   },
   {
     "code": "ZA22-TOK",
@@ -173,7 +194,8 @@
     "name_en": "Tokoloshe Lotto",
     "freq": "daily",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   },
   {
     "code": "ZA23-HIP",
@@ -181,7 +203,8 @@
     "name_en": "Hippo Goddess Lotto",
     "freq": "daily",
     "range": "1–49",
-    "draw": "6+bonus"
+    "draw": "6+bonus",
+    "model": "49-6B"
   },
   {
     "code": "ZA24-SEA",
@@ -189,6 +212,7 @@
     "name_en": "Sea Monster Legend Lotto",
     "freq": "daily",
     "range": "1–36",
-    "draw": "5"
+    "draw": "5",
+    "model": "36-5"
   }
 ]
