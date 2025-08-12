@@ -2,6 +2,7 @@
 const $ = (sel, ctx=document)=>ctx.querySelector(sel);
 const $$ = (sel, ctx=document)=>Array.from(ctx.querySelectorAll(sel));
 
+// i18n packs (same as v4)
 const i18n = {
   zh: {
     app_title: "Lucky Numbers — 南非原型",
@@ -115,104 +116,44 @@ const i18n = {
   }
 };
 
-const state = {
-  lang: localStorage.getItem('ln_lang') || 'zh',
-  games: [],
-  slip: [],
-  active: [],
-  history: [],
-  filter: 'all'
-};
+const state = { lang: localStorage.getItem('ln_lang') || 'zh', games: [], slip: [], active: [], history: [], filter: 'all' };
 
-function t(key, ...args){
-  const pack = i18n[state.lang];
-  const v = pack[key];
-  if (typeof v === 'function') return v(...args);
-  return v || key;
-}
-function setLang(lang){
-  state.lang = lang;
-  localStorage.setItem('ln_lang', lang);
-  refreshChrome();
-  renderRoute();
-}
+function t(key, ...args){ const pack=i18n[state.lang]; const v=pack[key]; return typeof v==='function'?v(...args):(v||key); }
+function setLang(lang){ state.lang=lang; localStorage.setItem('ln_lang',lang); refreshChrome(); renderRoute(); }
 
 const LS_KEYS = { SLIP:'ln_sa_slip_v1', HIST:'ln_sa_hist_v1' };
 function saveSlip(){ localStorage.setItem(LS_KEYS.SLIP, JSON.stringify(state.slip)); }
-function loadSlip(){ try{ state.slip = JSON.parse(localStorage.getItem(LS_KEYS.SLIP)||'[]'); }catch(e){ state.slip=[]; } }
+function loadSlip(){ try{ state.slip=JSON.parse(localStorage.getItem(LS_KEYS.SLIP)||'[]'); }catch(e){ state.slip=[]; } }
 function saveHistory(){ localStorage.setItem(LS_KEYS.HIST, JSON.stringify(state.history)); }
-function loadHistory(){ try{ state.history = JSON.parse(localStorage.getItem(LS_KEYS.HIST)||'[]'); }catch(e){ state.history=[]; } }
+function loadHistory(){ try{ state.history=JSON.parse(localStorage.getItem(LS_KEYS.HIST)||'[]'); }catch(e){ state.history=[]; } }
 
-function toast(msg, type='ok', ttl=3000){
-  const host = $('#toasts'); if(!host) return;
-  const tdiv = document.createElement('div');
-  tdiv.className = `toast ${type}`; tdiv.textContent = msg;
-  host.appendChild(tdiv);
-  setTimeout(()=>{ tdiv.style.opacity='0'; }, ttl-300);
-  setTimeout(()=>{ tdiv.remove(); }, ttl);
-}
+function toast(msg,type='ok',ttl=3000){ const host=$('#toasts'); if(!host) return; const tdiv=document.createElement('div'); tdiv.className=`toast ${type}`; tdiv.textContent=msg; host.appendChild(tdiv); setTimeout(()=>{tdiv.style.opacity='0';},ttl-300); setTimeout(()=>{tdiv.remove();},ttl); }
 
-function computeNextDraw(freq) {
-  const now = new Date();
-  let next = new Date(now);
-  if (freq === '5m') next.setMinutes(Math.floor(now.getMinutes()/5)*5 + 5, 0, 0);
-  else if (freq === '10m') next.setMinutes(Math.floor(now.getMinutes()/10)*10 + 10, 0, 0);
-  else if (freq === '30m') next.setMinutes(now.getMinutes()<30?30:60, 0, 0);
-  else if (freq === '60m') next.setHours(now.getMinutes()===0 ? now.getHours() : now.getHours()+1, 0, 0, 0);
-  else if (freq === 'daily2') {
-    const slots = [14*60+30, 20*60+30]; const mins = now.getHours()*60 + now.getMinutes();
-    const cand = slots.find(m => m > mins);
-    if (cand!==undefined) { const h = Math.floor(cand/60), m = cand%60; next.setHours(h, m, 0, 0); }
-    else { next.setDate(now.getDate()+1); next.setHours(14,30,0,0); }
-  } else if (freq === 'daily') { const t = new Date(now); t.setHours(21,0,0,0); if (t<=now) t.setDate(t.getDate()+1); next=t; }
+function computeNextDraw(freq){ const now=new Date(); let next=new Date(now);
+  if(freq==='5m') next.setMinutes(Math.floor(now.getMinutes()/5)*5+5,0,0);
+  else if(freq==='10m') next.setMinutes(Math.floor(now.getMinutes()/10)*10+10,0,0);
+  else if(freq==='30m') next.setMinutes(now.getMinutes()<30?30:60,0,0);
+  else if(freq==='60m') next.setHours(now.getMinutes()===0?now.getHours():now.getHours()+1,0,0,0);
+  else if(freq==='daily2'){ const slots=[14*60+30,20*60+30]; const mins=now.getHours()*60+now.getMinutes(); const cand=slots.find(m=>m>mins); if(cand!==undefined){ const h=Math.floor(cand/60),m=cand%60; next.setHours(h,m,0,0);} else { next.setDate(now.getDate()+1); next.setHours(14,30,0,0);} }
+  else if(freq==='daily'){ const t=new Date(now); t.setHours(21,0,0,0); if(t<=now) t.setDate(t.getDate()+1); next=t; }
   else next.setMinutes(now.getMinutes()+5,0,0);
   return next.getTime();
 }
 function fmtCountdown(ts){ const s=Math.max(0,Math.floor((ts-Date.now())/1000)); const mm=String(Math.floor(s/60)).padStart(2,'0'); const ss=String(s%60).padStart(2,'0'); return `${mm}:${ss}`; }
-function countdownClass(ts){ const s = Math.floor((ts-Date.now())/1000); if(s<=20) return 'danger'; if(s<=60) return 'warn'; return ''; }
-function isClosed(ts){ return (ts - Date.now()) <= 60000; }
-
+function countdownClass(ts){ const s=Math.floor((ts-Date.now())/1000); if(s<=20) return 'danger'; if(s<=60) return 'warn'; return ''; }
+function isClosed(ts){ return (ts-Date.now())<=60000; }
 function rangeOfModel(model){ if(model==='49-6B'||model==='49-7') return 49; if(model==='36-5') return 36; return 49; }
 function kOfModel(model){ if(model==='49-6B') return 7; if(model==='49-7') return 7; if(model==='36-5') return 5; return 6; }
 function pickDistinct(n,k){ const a=Array.from({length:n},(_,i)=>i+1); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a.slice(0,k).sort((a,b)=>a-b); }
+function seededDraw(game){ const n=rangeOfModel(game.model), k=kOfModel(game.model); let seed=0; const s=game.code+String(game.nextDrawAt); for(let i=0;i<s.length;i++) seed=(seed*131+s.charCodeAt(i))>>>0; function rnd(){ seed=(1664525*seed+1013904223)>>>0; return seed/4294967296; } const pool=Array.from({length:n},(_,i)=>i+1); const out=[]; for(let i=0;i<k;i++){ const idx=Math.floor(rnd()*pool.length); out.push(pool[idx]); pool.splice(idx,1);} return out.sort((a,b)=>a-b); }
 
-// Deterministic pseudo draw from seed (game.code + nextDrawAt)
-function seededDraw(game){
-  const n = rangeOfModel(game.model);
-  const k = kOfModel(game.model);
-  // Simple LCG based on seed numeric
-  const seedStr = game.code + String(game.nextDrawAt);
-  let seed = 0;
-  for (let i=0;i<seedStr.length;i++) seed = (seed*131 + seedStr.charCodeAt(i)) >>> 0;
-  function rnd(){ seed = (1664525 * seed + 1013904223) >>> 0; return seed/4294967296; }
-  const pool = Array.from({length:n}, (_,i)=>i+1);
-  const out = [];
-  for(let i=0;i<k;i++){
-    const idx = Math.floor(rnd()*pool.length);
-    out.push(pool[idx]);
-    pool.splice(idx,1);
-  }
-  out.sort((a,b)=>a-b);
-  return out;
-}
+async function loadGames(){ const res=await fetch('data/games.json'); const arr=await res.json(); state.games=arr.map(g=>({...g,nextDrawAt:computeNextDraw(g.freq)})); state.gameMap=Object.fromEntries(state.games.map(g=>[g.code,g])); }
 
-async function loadGames(){ const res = await fetch('data/games.json'); const arr = await res.json(); state.games = arr.map(g=>({...g, nextDrawAt: computeNextDraw(g.freq)})); state.gameMap = Object.fromEntries(state.games.map(g=>[g.code,g])); }
-
-function refreshChrome(){
-  $('#title').textContent = t('app_title');
-  $('#nav-lobby').textContent = t('nav_lobby');
-  $('#nav-active').textContent = t('nav_active');
-  $('#nav-history').textContent = t('nav_history');
-  $('#slip-title').textContent = t('slip_title');
-  $('#total-stakes-label').textContent = t('total_stakes');
-  $('#submit-bets').textContent = t('submit_all');
-  $('#lang-toggle').textContent = (state.lang==='zh' ? 'EN' : '中');
-  updateSlipBadge();
-}
+function refreshChrome(){ $('#title').textContent=t('app_title'); $('#nav-lobby').textContent=t('nav_lobby'); $('#nav-active').textContent=t('nav_active'); $('#nav-history').textContent=t('nav_history'); $('#slip-title').textContent=t('slip_title'); $('#total-stakes-label').textContent=t('total_stakes'); $('#submit-bets').textContent=t('submit_all'); $('#lang-toggle').textContent=(state.lang==='zh'?'EN':'中'); updateSlipBadge(); }
 
 function renderLobby(){
-  const container = document.createElement('div');
-  container.innerHTML = `
+  const container=document.createElement('div');
+  container.innerHTML=`
     <section>
       <div class="filters">
         <button class="filter ${state.filter==='all'?'active':''}" data-f="all">${t('filters_all')}</button>
@@ -221,17 +162,15 @@ function renderLobby(){
         <button class="filter ${state.filter==='df'?'active':''}" data-f="df">${t('filters_df')}</button>
       </div>
       <div class="grid cols-4" id="game-grid"></div>
-    </section>
-  `;
-  const grid = $('#game-grid', container);
-  const filt = (g)=> state.filter==='all' ? true : state.filter==='hf' ? (g.freq==='5m'||g.freq==='10m') : state.filter==='mf' ? (g.freq==='30m'||g.freq==='60m') : (g.freq==='daily'||g.freq==='daily2');
+    </section>`;
+  const grid=$('#game-grid',container);
+  const filt=(g)=> state.filter==='all'?true: state.filter==='hf'?(g.freq==='5m'||g.freq==='10m'): state.filter==='mf'?(g.freq==='30m'||g.freq==='60m'):(g.freq==='daily'||g.freq==='daily2');
 
   state.games.filter(filt).forEach(g=>{
-    const card = document.createElement('div'); card.className='card'; card.dataset.code=g.code;
-    const closed = isClosed(g.nextDrawAt);
-    const nameMain = state.lang==='zh' ? g.name : g.name_en;
-    const nameSub = state.lang==='zh' ? g.name_en : g.name;
-    card.innerHTML = `
+    const card=document.createElement('div'); card.className='card'; card.dataset.code=g.code;
+    const closed=isClosed(g.nextDrawAt);
+    const nameMain=state.lang==='zh'?g.name:g.name_en; const nameSub=state.lang==='zh'?g.name_en:g.name;
+    card.innerHTML=`
       <div class="title">${nameMain} <span class="small">(${nameSub})</span></div>
       <div class="badges">
         <span class="badge">${g.model}</span>
@@ -239,109 +178,58 @@ function renderLobby(){
         <span class="badge" data-freq="${g.code}">${badgeForFreq(g.freq)}</span>
         <span class="badge ${closed?'closed':''}" data-closed="${g.code}">${closed?t('badge_closed'):t('badge_open')}</span>
       </div>
-
       <div class="normal" data-normal="${g.code}">
-        <div class="row">
-          <span class="muted">${t('next_draw_in')}</span>
-          <strong class="countdown" data-code="${g.code}">--:--</strong>
-        </div>
-        <div class="footer-actions">
-          <button class="btn" data-open="${g.code}">${t('details')}</button>
-          <button class="btn primary" data-bet="${g.code}">${t('bet')}</button>
-        </div>
+        <div class="row"><span class="muted">${t('next_draw_in')}</span><strong class="countdown" data-code="${g.code}">--:--</strong></div>
+        <div class="footer-actions"><button class="btn" data-open="${g.code}">${t('details')}</button><button class="btn primary" data-bet="${g.code}">${t('bet')}</button></div>
       </div>
-
       <div class="reveal" data-reveal="${g.code}">
-        <div class="row">
-          <span class="badge" data-reveal-badge="${g.code}">${t('badge_drawing')}</span>
-          <div class="ball-row" data-balls="${g.code}"></div>
-        </div>
-      </div>
-    `;
+        <div class="row"><span class="badge" data-reveal-badge="${g.code}">${t('badge_drawing')}</span><div class="ball-row" data-balls="${g.code}"></div></div>
+      </div>`;
     grid.appendChild(card);
   });
 
-  $$('.filter', container).forEach(btn=>btn.addEventListener('click', e=>{ state.filter=e.target.dataset.f; route('#/lobby'); }));
-  grid.addEventListener('click', (e)=>{ const code = e.target.dataset.open || e.target.dataset.bet; if(!code) return; openBetPanel(state.games.find(x=>x.code===code)); });
+  // FIX: re-render directly on filter click, use currentTarget
+  $$('.filter',container).forEach(btn=>btn.addEventListener('click', e=>{ state.filter=e.currentTarget.dataset.f; renderLobby(); }));
+  grid.addEventListener('click', (e)=>{ const code=e.target.dataset.open||e.target.dataset.bet; if(!code) return; openBetPanel(state.games.find(x=>x.code===code)); });
 
-  $('#app').innerHTML = ''; $('#app').appendChild(container); startTick();
+  $('#app').innerHTML=''; $('#app').appendChild(container); startTick();
 }
 
 let tickTimer;
 function startTick(){
-  if (tickTimer) clearInterval(tickTimer);
-
-  function ensureRevealState(g){
-    if (!g._reveal) g._reveal = { phase:'idle', shown:0, lastAt:0, result:[], holdUntil:0 };
-  }
-
+  if(tickTimer) clearInterval(tickTimer);
+  function ensureRevealState(g){ if(!g._reveal) g._reveal={phase:'idle', shown:0, lastAt:0, result:[], holdUntil:0}; }
   function tick(){
     state.games.forEach(g=>{
       ensureRevealState(g);
-      const el=$(`.countdown[data-code="${g.code}"]`);
-      const st=$(`.badge[data-closed="${g.code}"]`);
-      const normal=$(`.normal[data-normal="${g.code}"]`);
-      const reveal=$(`.reveal[data-reveal="${g.code}"]`);
-      const balls=$(`.ball-row[data-balls="${g.code}"]`);
-      const rb=$(`span[data-reveal-badge="${g.code}"]`);
-      if(!el || !st || !normal || !reveal || !balls || !rb) return;
-
-      // Only apply lobby reveal to the test game
-      const isTestGame = g.code === 'ZA01-TBL';
-
-      if (isTestGame){
-        if (g._reveal.phase==='idle'){
-          // normal countdown until time reaches
-          el.textContent=fmtCountdown(g.nextDrawAt);
-          el.classList.remove('warn','danger'); const cls=countdownClass(g.nextDrawAt); if(cls) el.classList.add(cls);
-          const closed=isClosed(g.nextDrawAt); st.textContent=closed?t('badge_closed'):t('badge_open'); st.classList.toggle('closed', closed);
-          if (Date.now() >= g.nextDrawAt){
-            // start drawing
-            g._reveal.phase='drawing';
-            g._reveal.result = seededDraw(g);
-            g._reveal.shown = 0;
-            g._reveal.lastAt = Date.now()-1000; // immediate first ball
-            normal.style.display='none';
-            reveal.classList.add('active');
-            rb.textContent = t('badge_drawing');
-            balls.innerHTML='';
+      const el=$(`.countdown[data-code="${g.code}"]`), st=$(`.badge[data-closed="${g.code}"]`), normal=$(`.normal[data-normal="${g.code}"]`), reveal=$(`.reveal[data-reveal="${g.code}"]`), balls=$(`.ball-row[data-balls="${g.code}"]`), rb=$(`span[data-reveal-badge="${g.code}"]`);
+      if(!el||!st||!normal||!reveal||!balls||!rb) return;
+      const isTestGame = g.code==='ZA01-TBL';
+      if(isTestGame){
+        if(g._reveal.phase==='idle'){
+          el.textContent=fmtCountdown(g.nextDrawAt); el.classList.remove('warn','danger'); const cls=countdownClass(g.nextDrawAt); if(cls) el.classList.add(cls);
+          const closed=isClosed(g.nextDrawAt); st.textContent=closed?t('badge_closed'):t('badge_open'); st.classList.toggle('closed',closed);
+          if(Date.now()>=g.nextDrawAt){
+            g._reveal.phase='drawing'; g._reveal.result=seededDraw(g); g._reveal.shown=0; g._reveal.lastAt=Date.now()-1000;
+            normal.style.display='none'; reveal.classList.add('active'); rb.textContent=t('badge_drawing'); balls.innerHTML='';
           }
-        } else if (g._reveal.phase==='drawing'){
-          // add balls every 500ms
-          if (Date.now() - g._reveal.lastAt >= 500){
-            const val = g._reveal.result[g._reveal.shown];
-            const node = document.createElement('div');
-            node.className = 'ball bounce' + ((g.model==='49-6B' && g._reveal.shown===g._reveal.result.length-1)?' bonus':'');
-            node.textContent = val;
-            balls.appendChild(node);
-            g._reveal.shown++;
-            g._reveal.lastAt = Date.now();
-            if (g._reveal.shown >= g._reveal.result.length){
-              g._reveal.phase='hold';
-              g._reveal.holdUntil = Date.now() + 30000; // show 30s
-              rb.textContent = t('badge_result');
-            }
+        } else if(g._reveal.phase==='drawing'){
+          if(Date.now()-g._reveal.lastAt>=500){
+            const val=g._reveal.result[g._reveal.shown]; const node=document.createElement('div'); node.className='ball bounce' + ((g.model==='49-6B' && g._reveal.shown===g._reveal.result.length-1)?' bonus':''); node.textContent=val; balls.appendChild(node);
+            g._reveal.shown++; g._reveal.lastAt=Date.now();
+            if(g._reveal.shown>=g._reveal.result.length){ g._reveal.phase='hold'; g._reveal.holdUntil=Date.now()+30000; rb.textContent=t('badge_result'); }
           }
-          st.textContent = t('badge_drawing'); st.classList.remove('closed');
-        } else if (g._reveal.phase==='hold'){
-          // display result until holdUntil
-          st.textContent = t('badge_result'); st.classList.remove('closed');
-          if (Date.now() >= g._reveal.holdUntil){
-            // reset for next round
-            g.nextDrawAt = computeNextDraw(g.freq);
-            g._reveal = { phase:'idle', shown:0, lastAt:0, result:[], holdUntil:0 };
-            reveal.classList.remove('active');
-            normal.style.display='block';
-            balls.innerHTML='';
-            rb.textContent = t('badge_drawing');
+          st.textContent=t('badge_drawing'); st.classList.remove('closed');
+        } else if(g._reveal.phase==='hold'){
+          st.textContent=t('badge_result'); st.classList.remove('closed');
+          if(Date.now()>=g._reveal.holdUntil){
+            g.nextDrawAt=computeNextDraw(g.freq); g._reveal={phase:'idle', shown:0, lastAt:0, result:[], holdUntil:0}; reveal.classList.remove('active'); normal.style.display='block'; balls.innerHTML=''; rb.textContent=t('badge_drawing');
           }
         }
       } else {
-        // Non-test games: normal behavior (roll forward when pass deadline)
-        el.textContent=fmtCountdown(g.nextDrawAt);
-        el.classList.remove('warn','danger'); const cls=countdownClass(g.nextDrawAt); if(cls) el.classList.add(cls);
-        const closed=isClosed(g.nextDrawAt); st.textContent=closed?t('badge_closed'):t('badge_open'); st.classList.toggle('closed', closed);
-        if (Date.now() >= g.nextDrawAt) g.nextDrawAt = computeNextDraw(g.freq);
+        el.textContent=fmtCountdown(g.nextDrawAt); el.classList.remove('warn','danger'); const cls=countdownClass(g.nextDrawAt); if(cls) el.classList.add(cls);
+        const closed=isClosed(g.nextDrawAt); st.textContent=closed?t('badge_closed'):t('badge_open'); st.classList.toggle('closed',closed);
+        if(Date.now()>=g.nextDrawAt) g.nextDrawAt=computeNextDraw(g.freq);
       }
     });
   }
@@ -350,11 +238,7 @@ function startTick(){
 
 function badgeForFreq(freq){ return ({'5m':'Every 5m','10m':'Every 10m','30m':'Every 30m','60m':'Hourly','daily2':'Twice Daily','daily':'Daily'})[freq]||freq; }
 
-/* ---- Betting Panel / Slip / Active / History from v3 (shortened for brevity) ---- */
-/* Full implementations included to keep prototype usable */
-
-function rangeOfModel(model){ if(model==='49-6B'||model==='49-7') return 49; if(model==='36-5') return 36; return 49; } // duplicate guard
-
+// --- Betting Panel / Slip / Active / History (unchanged) ---
 function openBetPanel(game){
   $('#modal-title').textContent = state.lang==='zh' ? `${game.name} (${game.name_en})` : `${game.name_en} (${game.name})`;
   const body = $('#modal-body'); body.innerHTML='';
@@ -535,8 +419,7 @@ function renderHistory(){
 function renderRoute(){ const hash=location.hash||'#/lobby'; if(hash.startsWith('#/active')) renderActive(); else if(hash.startsWith('#/history')) renderHistory(); else renderLobby(); }
 function route(h){ location.hash=h; }
 window.addEventListener('hashchange', renderRoute);
-
-$('#lang-toggle').onclick = ()=> setLang(state.lang==='zh' ? 'en' : 'zh');
+$('#lang-toggle').onclick = ()=> setLang(state.lang==='zh'?'en':'zh');
 
 async function init(){ loadSlip(); loadHistory(); await loadGames(); refreshChrome(); renderRoute(); updateSlipBadge(); }
 init();
