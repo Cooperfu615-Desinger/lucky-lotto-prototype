@@ -1,0 +1,194 @@
+[
+  {
+    "code": "ZA01-TBL",
+    "name": "桌山之巔",
+    "name_en": "Table Mountain Peak",
+    "freq": "5m",
+    "range": "1–49",
+    "draw": "7 (incl. bonus)"
+  },
+  {
+    "code": "ZA02-ZUL",
+    "name": "祖魯戰士",
+    "name_en": "Zulu Warrior",
+    "freq": "5m",
+    "range": "1–36",
+    "draw": "5"
+  },
+  {
+    "code": "ZA03-MAN",
+    "name": "曼德拉榮耀",
+    "name_en": "Mandela Glory",
+    "freq": "5m",
+    "range": "1–49",
+    "draw": "6+bonus"
+  },
+  {
+    "code": "ZA04-SHK",
+    "name": "沙卡王朝",
+    "name_en": "Shaka Dynasty",
+    "freq": "5m",
+    "range": "1–36",
+    "draw": "5"
+  },
+  {
+    "code": "ZA05-ZUD",
+    "name": "祖魯舞彩",
+    "name_en": "Zulu Dance Lotto",
+    "freq": "10m",
+    "range": "1–49",
+    "draw": "6+bonus"
+  },
+  {
+    "code": "ZA06-HER",
+    "name": "Heritage Day 彩",
+    "name_en": "Heritage Day Lotto",
+    "freq": "10m",
+    "range": "1–36",
+    "draw": "5"
+  },
+  {
+    "code": "ZA07-CPC",
+    "name": "開普狂歡彩",
+    "name_en": "Cape Carnival Lotto",
+    "freq": "10m",
+    "range": "1–49",
+    "draw": "7"
+  },
+  {
+    "code": "ZA08-HRV",
+    "name": "收穫慶彩",
+    "name_en": "Harvest Festival Lotto",
+    "freq": "10m",
+    "range": "1–36",
+    "draw": "5"
+  },
+  {
+    "code": "ZA09-TSS",
+    "name": "桌山日落",
+    "name_en": "Table Mountain Sunset",
+    "freq": "30m",
+    "range": "1–49",
+    "draw": "6+bonus"
+  },
+  {
+    "code": "ZA10-KRG",
+    "name": "克魯格獅彩",
+    "name_en": "Kruger Lion Lotto",
+    "freq": "30m",
+    "range": "1–49",
+    "draw": "7"
+  },
+  {
+    "code": "ZA11-DBN",
+    "name": "德班海浪",
+    "name_en": "Durban Waves",
+    "freq": "30m",
+    "range": "1–36",
+    "draw": "5"
+  },
+  {
+    "code": "ZA12-AVG",
+    "name": "奧古斯汀瀑布彩",
+    "name_en": "Augrabies Falls Lotto",
+    "freq": "30m",
+    "range": "1–49",
+    "draw": "7"
+  },
+  {
+    "code": "ZA13-JNB",
+    "name": "約堡之夜",
+    "name_en": "Johannesburg Nights",
+    "freq": "30m",
+    "range": "1–49",
+    "draw": "6+bonus"
+  },
+  {
+    "code": "ZA14-CPT",
+    "name": "開普港口彩",
+    "name_en": "Cape Harbour Lotto",
+    "freq": "30m",
+    "range": "1–36",
+    "draw": "5"
+  },
+  {
+    "code": "ZA15-SOW",
+    "name": "Soweto 節奏",
+    "name_en": "Soweto Rhythm",
+    "freq": "60m",
+    "range": "1–49",
+    "draw": "6+bonus"
+  },
+  {
+    "code": "ZA16-RAC",
+    "name": "南非賽馬彩",
+    "name_en": "South Africa Horse Racing",
+    "freq": "60m",
+    "range": "1–36",
+    "draw": "5"
+  },
+  {
+    "code": "ZA17-LIO",
+    "name": "獅王彩",
+    "name_en": "Lion King Lotto",
+    "freq": "60m",
+    "range": "1–49",
+    "draw": "7"
+  },
+  {
+    "code": "ZA18-RHI",
+    "name": "犀牛彩",
+    "name_en": "Rhino Lotto",
+    "freq": "60m",
+    "range": "1–36",
+    "draw": "5"
+  },
+  {
+    "code": "ZA19-ELE",
+    "name": "大象彩",
+    "name_en": "Elephant Lotto",
+    "freq": "60m",
+    "range": "1–49",
+    "draw": "6+bonus"
+  },
+  {
+    "code": "ZA20-BUF",
+    "name": "水牛彩",
+    "name_en": "Buffalo Lotto",
+    "freq": "60m",
+    "range": "1–36",
+    "draw": "5"
+  },
+  {
+    "code": "ZA21-LEO",
+    "name": "豹影彩",
+    "name_en": "Leopard Shadow Lotto",
+    "freq": "daily2",
+    "range": "1–49",
+    "draw": "7"
+  },
+  {
+    "code": "ZA22-TOK",
+    "name": "Tokoloshe 彩",
+    "name_en": "Tokoloshe Lotto",
+    "freq": "daily",
+    "range": "1–36",
+    "draw": "5"
+  },
+  {
+    "code": "ZA23-HIP",
+    "name": "河馬女神彩",
+    "name_en": "Hippo Goddess Lotto",
+    "freq": "daily",
+    "range": "1–49",
+    "draw": "6+bonus"
+  },
+  {
+    "code": "ZA24-SEA",
+    "name": "海怪傳奇彩",
+    "name_en": "Sea Monster Legend Lotto",
+    "freq": "daily",
+    "range": "1–36",
+    "draw": "5"
+  }
+]

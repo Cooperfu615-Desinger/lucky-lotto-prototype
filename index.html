@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lucky Numbers SA — Prototype</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Lucky Numbers — SA Prototype</h1>
+    <nav>
+      <a href="#/lobby">Lobby</a>
+      <a href="#/active">Active Bets</a>
+      <a href="#/history">Bet History</a>
+      <button id="open-slip" class="btn primary">Bet Slip (0)</button>
+    </nav>
+  </header>
+
+  <main id="app"></main>
+
+  <!-- Bet Slip Drawer -->
+  <div id="slip-drawer" class="drawer hidden">
+    <div class="drawer-header">
+      <h2>Bet Slip (Pending)</h2>
+      <button id="close-slip" class="icon-btn">✕</button>
+    </div>
+    <div id="slip-list" class="slip-list"></div>
+    <div class="drawer-footer">
+      <div class="totals"><span>Total Stakes:</span> <strong id="total-stake">R 0.00</strong></div>
+      <button id="submit-bets" class="btn success">Submit All Bets</button>
+    </div>
+  </div>
+
+  <!-- Modal for Betting Panel -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Game</h3>
+        <button id="modal-close" class="icon-btn">✕</button>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
