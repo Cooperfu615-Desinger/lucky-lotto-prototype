@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lucky Lotto Prototype v4.4.0</title>
+  <title>Lucky Lotto Prototype v4.5.2 (RTP)</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Lucky Lotto <span class="ver">v4.4.0</span></div>
+    <div class="brand">Lucky Lotto <span class="ver">v4.5.2-RTP</span></div>
     <div class="lang-switch">
       <button id="btn-lang-zh" class="btn small">中文</button>
       <button id="btn-lang-en" class="btn small ghost">EN</button>
@@ -32,7 +32,6 @@
       <div class="bet-header">
         <button class="btn small ghost" id="btn-back">&larr; <span data-i18n="back">返回</span></button>
         <h2 id="bet-title">-</h2>
-        <div id="bet-meta" class="meta-mini"></div>
       </div>
 
       <div class="bet-body">
@@ -52,8 +51,9 @@
             <div class="label small" id="main-note"></div>
             <div id="number-grid" class="numbers"></div>
             <div class="actions">
-              <button id="btn-quick" class="btn" data-i18n="quick_pick">快速選號 (Q)</button>
-              <button id="btn-clear" class="btn ghost" data-i18n="clear">清除 (C)</button>
+              <button id="btn-quick" class="btn" data-i18n="quick_pick">快速選號</button>
+              <button id="btn-clear" class="btn ghost" data-i18n="clear">清除</button>
+              <button id="btn-add-slip" class="btn primary" data-i18n="add_to_slip">加入注單</button>
             </div>
           </div>
 
@@ -68,54 +68,36 @@
               <div class="label small" id="bonus-note"></div>
               <div id="bonus-grid" class="numbers"></div>
               <div class="actions">
-                <button id="btn-bonus-quick" class="btn" data-i18n="quick_pick">快速選號 (Q)</button>
-                <button id="btn-bonus-clear" class="btn ghost" data-i18n="clear">清除 (C)</button>
+                <button id="btn-bonus-quick" class="btn" data-i18n="quick_pick">快速選號</button>
+                <button id="btn-bonus-clear" class="btn ghost" data-i18n="clear">清除</button>
+                <button id="btn-add-bonus" class="btn primary" data-i18n="add_to_slip">加入注單</button>
               </div>
             </div>
 
             <div id="bonus-oe-wrap" style="display:none">
-              <div class="seg tight">
+              <div class="seg tight" id="wrap-oe">
                 <button class="seg-btn" data-oe="Odd" data-i18n="odd">單</button>
                 <button class="seg-btn" data-oe="Even" data-i18n="even">雙</button>
+              </div>
+              <div class="actions">
+                <button id="btn-add-oe" class="btn primary" data-i18n="add_to_slip">加入注單</button>
               </div>
             </div>
 
             <div id="bonus-hl-wrap" style="display:none">
-              <div class="seg tight">
+              <div class="seg tight" id="wrap-hl">
                 <button class="seg-btn" data-hl="Low" data-i18n="low">小</button>
                 <button class="seg-btn" data-hl="High" data-i18n="high">大</button>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="row">
-            <div class="col">
-              <div class="label" data-i18n="stake">投注金額</div>
-              <div class="stake-row">
-                <span>R</span>
-                <input id="stake" type="number" min="1" step="1" value="10" class="input" />
-              </div>
-              <div class="chips">
-                <button class="chip" data-amt="10">R10</button>
-                <button class="chip" data-amt="20">R20</button>
-                <button class="chip" data-amt="50">R50</button>
-                <button class="chip" data-amt="100">R100</button>
-              </div>
-              <div class="note" id="bet-note"></div>
-            </div>
-            <div class="col">
-              <div class="actions right">
-                <button id="btn-add-slip" class="btn primary" data-i18n="add_to_slip" disabled>加入注單 (A)</button>
-                <button id="btn-submit" class="btn success" data-i18n="submit_bets" disabled>送出投注 (S)</button>
+              <div class="actions">
+                <button id="btn-add-hl" class="btn primary" data-i18n="add_to_slip">加入注單</button>
               </div>
             </div>
           </div>
         </div>
 
         <div class="panel">
-          <div class="label" data-i18n="my_slip">我的注單</div>
+          <div class="label" data-i18n="my_slip">我的注單（此頁僅產生注單；金額與送出在下方抽屜）</div>
           <ul id="slip-list" class="list"></ul>
         </div>
       </div>
@@ -143,14 +125,32 @@
         <div class="title" data-i18n="my_slips">我的注單</div>
         <button class="btn small ghost" data-close>&times;</button>
       </div>
+      <div id="slips-total" class="label small"></div>
       <ul id="drawer-slip-list" class="list"></ul>
+      <div class="chips">
+        <button class="chip" data-chip="10">R10</button>
+        <button class="chip" data-chip="20">R20</button>
+        <button class="chip" data-chip="50">R50</button>
+        <button class="chip" data-chip="100">R100</button>
+      </div>
+      <div class="actions right" style="margin-top:8px">
+        <button id="btn-submit" class="btn success" disabled data-i18n="submit_bets">送出投注</button>
+      </div>
     </div>
   </section>
 
-  <div id="toast" class="toast"></div>
+  <section id="modal" class="modal">
+    <div class="modal-body">
+      <div class="modal-head">
+        <div class="title">Batch Detail</div>
+        <button class="btn small ghost" data-close-modal>&times;</button>
+      </div>
+      <ul id="modal-list" class="list"></ul>
+    </div>
+  </section>
 
   <footer class="foot">
-    <span id="foot-msg">快捷鍵：Q 快速選號、C 清除、A 加入注單、S 送出、B 返回</span>
+    <span id="foot-msg"></span>
   </footer>
 
   <script src="assets/app.js"></script>
