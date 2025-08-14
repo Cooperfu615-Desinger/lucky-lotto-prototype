@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lucky Lotto Prototype v4.2.1</title>
+  <title>Lucky Lotto Prototype v4.3</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Lucky Lotto <span class="ver">v4.2.1</span></div>
+    <div class="brand">Lucky Lotto <span class="ver">v4.3</span></div>
     <div class="lang-switch">
       <button id="btn-lang-zh" class="btn small">中文</button>
       <button id="btn-lang-en" class="btn small ghost">EN</button>
@@ -26,7 +26,6 @@
           <button class="tab" data-filter="daily" data-i18n="tab_daily">每日</button>
         </div>
       </div>
-
       <div id="grid-games" class="grid"></div>
     </section>
 
@@ -39,21 +38,72 @@
 
       <div class="bet-body">
         <div class="panel">
-          <div class="row">
-            <div class="col">
-              <div class="label" data-i18n="choose_numbers">選擇號碼</div>
-              <div id="number-grid" class="numbers"></div>
+          <div class="label" data-i18n="play_and_quick">玩法與快速投注</div>
+          <div class="seg" id="seg-market">
+            <button class="seg-btn active" data-market="main" data-i18n="market_main">主號</button>
+            <button class="seg-btn" data-market="bonus" data-i18n="market_bonus">特號</button>
+          </div>
+
+          <div id="main-panel" class="subpanel">
+            <div class="seg" id="seg-pick">
+              <button class="seg-btn active" data-pick="P1" data-i18n="pick1">買一球</button>
+              <button class="seg-btn" data-pick="P2" data-i18n="pick2">買兩球</button>
+              <button class="seg-btn" data-pick="P3" data-i18n="pick3">買三球</button>
+            </div>
+            <div class="label small" id="main-note"></div>
+            <div id="number-grid" class="numbers"></div>
+            <div class="actions">
+              <button id="btn-quick" class="btn" data-i18n="quick_pick">快速選號</button>
+              <button id="btn-clear" class="btn ghost" data-i18n="clear">清除</button>
+            </div>
+          </div>
+
+          <div id="bonus-panel" class="subpanel" style="display:none">
+            <div class="seg" id="seg-bonus-type">
+              <button class="seg-btn active" data-bonus="BONUS_NUM" data-i18n="bonus_number">特號號碼</button>
+              <button class="seg-btn" data-bonus="BONUS_OE" data-i18n="bonus_oe">特號單雙</button>
+              <button class="seg-btn" data-bonus="BONUS_HL" data-i18n="bonus_hl">特號大小</button>
+            </div>
+
+            <div id="bonus-num-wrap">
+              <div class="label small" id="bonus-note"></div>
+              <div id="bonus-grid" class="numbers"></div>
               <div class="actions">
-                <button id="btn-quick" class="btn" data-i18n="quick_pick">快速選號</button>
-                <button id="btn-clear" class="btn ghost" data-i18n="clear">清除</button>
+                <button id="btn-bonus-quick" class="btn" data-i18n="quick_pick">快速選號</button>
+                <button id="btn-bonus-clear" class="btn ghost" data-i18n="clear">清除</button>
               </div>
             </div>
+
+            <div id="bonus-oe-wrap" style="display:none">
+              <div class="seg tight">
+                <button class="seg-btn" data-oe="Odd" data-i18n="odd">單</button>
+                <button class="seg-btn" data-oe="Even" data-i18n="even">雙</button>
+              </div>
+            </div>
+
+            <div id="bonus-hl-wrap" style="display:none">
+              <div class="seg tight">
+                <button class="seg-btn" data-hl="Low" data-i18n="low">小</button>
+                <button class="seg-btn" data-hl="High" data-i18n="high">大</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="row">
             <div class="col">
               <div class="label" data-i18n="stake">投注金額</div>
-              <input id="stake" type="number" min="1" step="1" value="10" class="input" />
+              <div class="stake-row">
+                <span>R</span>
+                <input id="stake" type="number" min="1" step="1" value="10" class="input" />
+              </div>
               <div class="note" id="bet-note"></div>
-              <div class="actions">
+            </div>
+            <div class="col">
+              <div class="actions right">
                 <button id="btn-add-slip" class="btn primary" data-i18n="add_to_slip">加入注單</button>
+                <button id="btn-submit" class="btn success" data-i18n="submit_bets">送出投注</button>
               </div>
             </div>
           </div>
@@ -62,13 +112,37 @@
         <div class="panel">
           <div class="label" data-i18n="my_slip">我的注單</div>
           <ul id="slip-list" class="list"></ul>
-          <div class="actions">
-            <button id="btn-submit" class="btn success" data-i18n="submit_bets">送出投注</button>
-          </div>
         </div>
       </div>
     </section>
   </main>
+
+  <!-- Bottom bar -->
+  <nav class="bottombar">
+    <button id="btn-open-bets" class="btn flat" data-i18n="my_bets">我的投注</button>
+    <button id="btn-open-slips" class="btn flat" data-i18n="my_slips">我的注單</button>
+  </nav>
+
+  <!-- Drawers -->
+  <section id="drawer-bets" class="drawer">
+    <div class="drawer-body">
+      <div class="drawer-head">
+        <div class="title" data-i18n="my_bets">我的投注</div>
+        <button class="btn small ghost" data-close>&times;</button>
+      </div>
+      <ul id="bets-list" class="list"></ul>
+    </div>
+  </section>
+
+  <section id="drawer-slips" class="drawer">
+    <div class="drawer-body">
+      <div class="drawer-head">
+        <div class="title" data-i18n="my_slips">我的注單</div>
+        <button class="btn small ghost" data-close>&times;</button>
+      </div>
+      <ul id="drawer-slip-list" class="list"></ul>
+    </div>
+  </section>
 
   <footer class="foot">
     <span id="foot-msg"></span>
