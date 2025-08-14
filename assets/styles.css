@@ -1,4 +1,5 @@
 
+/* (same as v4.3, omitted for brevity in this cell) */
 :root{
   --bg:#0f1115; --card:#171a21; --muted:#8a93a5; --text:#e5e7eb;
   --accent:#fb923c; --ok:#22c55e; --err:#ef4444; --primary:#3b82f6;
@@ -45,20 +46,16 @@
 .list{list-style:none;margin:0;padding:0}
 .list li{display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed #273043;padding:8px 0;color:#cbd5e1}
 .foot{padding:8px 16px;border-top:1px solid #222;color:#94a3b8;font-size:12px}
-/* bottom bar */
 .bottombar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#0c0f14;border-top:1px solid #222;display:flex;gap:8px;justify-content:space-between;padding:10px 12px}
-/* drawers */
 .drawer{position:fixed;left:0;right:0;bottom:-100%;z-index:30;transition:bottom .2s ease}
 .drawer.open{bottom:0}
 .drawer-body{background:#0c0f14;border-top:1px solid #222;border-radius:16px 16px 0 0;min-height:40vh;max-height:80vh;overflow:auto;padding:12px 16px}
 .drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-/* segment */
 .seg{display:inline-flex;border:1px solid #2a3345;border-radius:999px;overflow:hidden}
 .seg.tiny .seg-btn{padding:6px 8px}
 .seg.tight .seg-btn{padding:6px 12px}
 .seg-btn{padding:8px 14px;border:0;background:#0c0f14;color:#cbd5e1;cursor:pointer}
 .seg-btn.active{background:#1b2330;color:#e2e8f0}
-/* reveal animation */
 .reveal-wrap{display:flex;gap:8px;margin-top:6px;min-height:40px}
 .reveal-ball{width:36px;height:36px;border-radius:999px;background:#111827;border:1px solid #334155;color:#e2e8f0;display:flex;align-items:center;justify-content:center;animation:bounce .4s ease;}
 @keyframes bounce{0%{transform:translateY(-8px)}50%{transform:translateY(3px)}100%{transform:translateY(0)}}

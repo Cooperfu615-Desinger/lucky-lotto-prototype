@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lucky Lotto Prototype v4.3</title>
+  <title>Lucky Lotto Prototype v4.3.1</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Lucky Lotto <span class="ver">v4.3</span></div>
+    <div class="brand">Lucky Lotto <span class="ver">v4.3.1</span></div>
     <div class="lang-switch">
       <button id="btn-lang-zh" class="btn small">中文</button>
       <button id="btn-lang-en" class="btn small ghost">EN</button>
@@ -16,7 +16,6 @@
   </header>
 
   <main id="app">
-    <!-- Lobby -->
     <section id="page-lobby" class="page active">
       <div class="toolbar">
         <div class="filters">
@@ -29,7 +28,6 @@
       <div id="grid-games" class="grid"></div>
     </section>
 
-    <!-- Betting -->
     <section id="page-bet" class="page">
       <div class="bet-header">
         <button class="btn small ghost" id="btn-back">&larr; <span data-i18n="back">返回</span></button>
@@ -117,13 +115,11 @@
     </section>
   </main>
 
-  <!-- Bottom bar -->
   <nav class="bottombar">
     <button id="btn-open-bets" class="btn flat" data-i18n="my_bets">我的投注</button>
     <button id="btn-open-slips" class="btn flat" data-i18n="my_slips">我的注單</button>
   </nav>
 
-  <!-- Drawers -->
   <section id="drawer-bets" class="drawer">
     <div class="drawer-body">
       <div class="drawer-head">
