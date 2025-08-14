@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lucky Lotto Prototype v4.3.3</title>
+  <title>Lucky Lotto Prototype v4.4.0</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Lucky Lotto <span class="ver">v4.3.3</span></div>
+    <div class="brand">Lucky Lotto <span class="ver">v4.4.0</span></div>
     <div class="lang-switch">
       <button id="btn-lang-zh" class="btn small">中文</button>
       <button id="btn-lang-en" class="btn small ghost">EN</button>
@@ -32,6 +32,7 @@
       <div class="bet-header">
         <button class="btn small ghost" id="btn-back">&larr; <span data-i18n="back">返回</span></button>
         <h2 id="bet-title">-</h2>
+        <div id="bet-meta" class="meta-mini"></div>
       </div>
 
       <div class="bet-body">
@@ -51,8 +52,8 @@
             <div class="label small" id="main-note"></div>
             <div id="number-grid" class="numbers"></div>
             <div class="actions">
-              <button id="btn-quick" class="btn" data-i18n="quick_pick">快速選號</button>
-              <button id="btn-clear" class="btn ghost" data-i18n="clear">清除</button>
+              <button id="btn-quick" class="btn" data-i18n="quick_pick">快速選號 (Q)</button>
+              <button id="btn-clear" class="btn ghost" data-i18n="clear">清除 (C)</button>
             </div>
           </div>
 
@@ -67,8 +68,8 @@
               <div class="label small" id="bonus-note"></div>
               <div id="bonus-grid" class="numbers"></div>
               <div class="actions">
-                <button id="btn-bonus-quick" class="btn" data-i18n="quick_pick">快速選號</button>
-                <button id="btn-bonus-clear" class="btn ghost" data-i18n="clear">清除</button>
+                <button id="btn-bonus-quick" class="btn" data-i18n="quick_pick">快速選號 (Q)</button>
+                <button id="btn-bonus-clear" class="btn ghost" data-i18n="clear">清除 (C)</button>
               </div>
             </div>
 
@@ -96,12 +97,18 @@
                 <span>R</span>
                 <input id="stake" type="number" min="1" step="1" value="10" class="input" />
               </div>
+              <div class="chips">
+                <button class="chip" data-amt="10">R10</button>
+                <button class="chip" data-amt="20">R20</button>
+                <button class="chip" data-amt="50">R50</button>
+                <button class="chip" data-amt="100">R100</button>
+              </div>
               <div class="note" id="bet-note"></div>
             </div>
             <div class="col">
               <div class="actions right">
-                <button id="btn-add-slip" class="btn primary" data-i18n="add_to_slip">加入注單</button>
-                <button id="btn-submit" class="btn success" data-i18n="submit_bets">送出投注</button>
+                <button id="btn-add-slip" class="btn primary" data-i18n="add_to_slip" disabled>加入注單 (A)</button>
+                <button id="btn-submit" class="btn success" data-i18n="submit_bets" disabled>送出投注 (S)</button>
               </div>
             </div>
           </div>
@@ -140,8 +147,10 @@
     </div>
   </section>
 
+  <div id="toast" class="toast"></div>
+
   <footer class="foot">
-    <span id="foot-msg"></span>
+    <span id="foot-msg">快捷鍵：Q 快速選號、C 清除、A 加入注單、S 送出、B 返回</span>
   </footer>
 
   <script src="assets/app.js"></script>

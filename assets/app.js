@@ -1,12 +1,16 @@
 
-/* v4.3.3: add missing updateNote(), keep .startsWith guards and storage migration */
+/* v4.4.0 UX: quick stake chips, disabled actions until valid, toasts, keyboard shortcuts, persist last market/pick, bet meta */
 const I18N = {
-  zh:{tab_all:"全部",tab_high:"高頻",tab_mid:"中頻",tab_daily:"每日",back:"返回",choose_numbers:"選擇號碼",stake:"投注金額",quick_pick:"快速選號",clear:"清除",add_to_slip:"加入注單",submit_bets:"送出投注",drawing:"開獎中",result:"結果",closed:"封盤",open:"開放",next_draw:"倒數",slip_empty:"暫無注單",selected:"已選",pick1:"買一球",pick2:"買兩球",pick3:"買三球",market_main:"主號",market_bonus:"特號",play_and_quick:"玩法與快速投注",bonus_number:"特號號碼",bonus_oe:"特號單雙",bonus_hl:"特號大小",odd:"單",even:"雙",low:"小",high:"大",my_bets:"我的投注",my_slips:"我的注單",my_slip:"我的注單"},
-  en:{tab_all:"All",tab_high:"High Freq",tab_mid:"Mid Freq",tab_daily:"Daily",back:"Back",choose_numbers:"Choose Numbers",stake:"Stake",quick_pick:"Quick Pick",clear:"Clear",add_to_slip:"Add to Slip",submit_bets:"Submit Bets",drawing:"Drawing",result:"Result",closed:"Closed",open:"Open",next_draw:"Countdown",slip_empty:"No bets yet",selected:"Selected",pick1:"Pick 1",pick2:"Pick 2",pick3:"Pick 3",market_main:"Main",market_bonus:"Bonus",play_and_quick:"Play & Quick Bet",bonus_number:"Bonus Number",bonus_oe:"Bonus Odd/Even",bonus_hl:"Bonus High/Low",odd:"Odd",even:"Even",low:"Low",high:"High",my_bets:"My Bets",my_slips:"My Slips",my_slip:"My Slips"}
+  zh:{tab_all:"全部",tab_high:"高頻",tab_mid:"中頻",tab_daily:"每日",back:"返回",choose_numbers:"選擇號碼",stake:"投注金額",quick_pick:"快速選號",clear:"清除",add_to_slip:"加入注單",submit_bets:"送出投注",drawing:"開獎中",result:"結果",closed:"封盤",open:"開放",next_draw:"倒數",slip_empty:"暫無注單",selected:"已選",pick1:"買一球",pick2:"買兩球",pick3:"買三球",market_main:"主號",market_bonus:"特號",play_and_quick:"玩法與快速投注",bonus_number:"特號號碼",bonus_oe:"特號單雙",bonus_hl:"特號大小",odd:"單",even:"雙",low:"小",high:"大",my_bets:"我的投注",my_slips:"我的注單",my_slip:"我的注單",confirm_submit:"確定要送出所有注單嗎？",added:"已加入注單"}, 
+  en:{tab_all:"All",tab_high:"High Freq",tab_mid:"Mid Freq",tab_daily:"Daily",back:"Back",choose_numbers:"Choose Numbers",stake:"Stake",quick_pick:"Quick Pick",clear:"Clear",add_to_slip:"Add to Slip",submit_bets:"Submit Bets",drawing:"Drawing",result:"Result",closed:"Closed",open:"Open",next_draw:"Countdown",slip_empty:"No bets yet",selected:"Selected",pick1:"Pick 1",pick2:"Pick 2",pick3:"Pick 3",market_main:"Main",market_bonus:"Bonus",play_and_quick:"Play & Quick Bet",bonus_number:"Bonus Number",bonus_oe:"Bonus Odd/Even",bonus_hl:"Bonus High/Low",odd:"Odd",even:"Even",low:"Low",high:"High",my_bets:"My Bets",my_slips:"My Slips",my_slip:"My Slips",confirm_submit:"Submit all slips?",added:"Added to slip"}
 };
 let LANG = localStorage.getItem("lang") || "zh";
 function t(k){ return (I18N[LANG] && I18N[LANG][k]) || k; }
-function applyI18N(){ document.querySelectorAll("[data-i18n]").forEach(el=>{ const k=el.getAttribute("data-i18n"); el.textContent=t(k); }); const zh=document.getElementById("btn-lang-zh"), en=document.getElementById("btn-lang-en"); if(zh) zh.classList.toggle("ghost", LANG!=="zh"); if(en) en.classList.toggle("ghost", LANG!=="en"); }
+function applyI18N(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ const k=el.getAttribute("data-i18n"); el.textContent=t(k); });
+  const zh=document.getElementById("btn-lang-zh"), en=document.getElementById("btn-lang-en");
+  if(zh) zh.classList.toggle("ghost", LANG!=="zh"); if(en) en.classList.toggle("ghost", LANG!=="en");
+}
 document.getElementById("btn-lang-zh").addEventListener("click", ()=>{ LANG="zh"; localStorage.setItem("lang",LANG); applyI18N(); renderLobby(); if(STATE.currentGame) openBetPage(STATE.currentGame.code); });
 document.getElementById("btn-lang-en").addEventListener("click", ()=>{ LANG="en"; localStorage.setItem("lang",LANG); applyI18N(); renderLobby(); if(STATE.currentGame) openBetPage(STATE.currentGame.code); });
 
@@ -44,31 +48,27 @@ function nextDrawOffset(f){ if(f==="high")return 2*60*1000; if(f==="mid")return 
 function migrateStorage(){
   let slip=JSON.parse(localStorage.getItem("slip")||"[]");
   let hist=JSON.parse(localStorage.getItem("betsHistory")||"[]");
-  slip = slip.map(it=>{
-    const type=(typeof it.type==="string"&&it.type)?it.type:(Array.isArray(it.numbers)?"P"+(it.numbers.length||1):"BONUS_NUM");
-    const detail=(typeof it.detail==="string")?it.detail:"";
-    const game=it.game&&it.game.code?it.game:{code:"UNKNOWN",name_zh:"未知彩種",name_en:"Unknown Game",model:"49-6B"};
-    return {game,type,numbers:Array.isArray(it.numbers)?it.numbers:[],detail,stake:Number(it.stake||0),createdAt:it.createdAt||new Date().toISOString()};
-  });
-  localStorage.setItem("slip",JSON.stringify(slip));
-  hist = hist.map(b=>{
-    if(!Array.isArray(b.items)) return b;
-    b.items=b.items.map(it=>{
-      const type=(typeof it.type==="string"&&it.type)?it.type:(Array.isArray(it.numbers)?"P"+(it.numbers.length||1):"BONUS_NUM");
-      const detail=(typeof it.detail==="string")?it.detail:"";
-      const game=it.game&&it.game.code?it.game:{code:"UNKNOWN",name_zh:"未知彩種",name_en:"Unknown Game",model:"49-6B"};
-      return {game,type,numbers:Array.isArray(it.numbers)?it.numbers:[],detail,stake:Number(it.stake||0),createdAt:it.createdAt||new Date().toISOString()};
-    });
-    return b;
-  });
-  localStorage.setItem("betsHistory",JSON.stringify(hist));
+  slip=slip.map(it=>{const type=(typeof it.type==="string"&&it.type)?it.type:(Array.isArray(it.numbers)?"P"+(it.numbers.length||1):"BONUS_NUM");const detail=(typeof it.detail==="string")?it.detail:"";const game=it.game&&it.game.code?it.game:{code:"UNKNOWN",name_zh:"未知彩種",name_en:"Unknown Game",model:"49-6B"};return {game,type,numbers:Array.isArray(it.numbers)?it.numbers:[],detail,stake:Number(it.stake||0),createdAt:it.createdAt||new Date().toISOString()};});localStorage.setItem("slip",JSON.stringify(slip));hist=hist.map(b=>{if(!Array.isArray(b.items))return b;b.items=b.items.map(it=>{const type=(typeof it.type==="string"&&it.type)?it.type:(Array.isArray(it.numbers)?"P"+(it.numbers.length||1):"BONUS_NUM");const detail=(typeof it.detail==="string")?it.detail:"";const game=it.game&&it.game.code?it.game:{code:"UNKNOWN",name_zh:"未知彩種",name_en:"Unknown Game",model:"49-6B"};return {game,type,numbers:Array.isArray(it.numbers)?it.numbers:[],detail,stake:Number(it.stake||0),createdAt:it.createdAt||new Date().toISOString()};});return b;});localStorage.setItem("betsHistory",JSON.stringify(hist));
 }
 migrateStorage();
 
-const STATE={ filter:"all", draws:{}, slip:JSON.parse(localStorage.getItem("slip")||"[]"), betsHistory:JSON.parse(localStorage.getItem("betsHistory")||"[]"), selection:[], selectionBonus:null, currentGame:null, marketTab:"main", pickMode:"P1", bonusType:"BONUS_NUM" };
+const STATE={
+  filter:"all",
+  draws:{},
+  slip:JSON.parse(localStorage.getItem("slip")||"[]"),
+  betsHistory:JSON.parse(localStorage.getItem("betsHistory")||"[]"),
+  selection:[],
+  selectionBonus:null,
+  currentGame:null,
+  marketTab:localStorage.getItem("lastMarketTab")||"main",
+  pickMode:localStorage.getItem("lastPickMode")||"P1",
+  bonusType:"BONUS_NUM",
+};
 function saveLocal(){ localStorage.setItem("slip",JSON.stringify(STATE.slip)); localStorage.setItem("betsHistory",JSON.stringify(STATE.betsHistory)); }
 function ensureDrawState(code,freq){ if(!STATE.draws[code]){ STATE.draws[code]={ nextDue: NOW()+nextDrawOffset(freq), phase:"open", reveal:[], resultHoldUntil:0 }; } }
 function miniLabel(mk,fk){ const m=MODELS[mk]; const f=FREQ_LABEL[fk]||""; return `${m.label}, ${f}`; }
+
+function toast(msg){ const t=document.getElementById("toast"); if(!t) return; t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1600); }
 
 function renderLobby(){
   const grid=document.getElementById("grid-games"); grid.innerHTML="";
@@ -76,9 +76,9 @@ function renderLobby(){
   const list=GAMES.filter(g=>STATE.filter==="all"?true:g.freq===STATE.filter);
   list.forEach(g=>{
     const el=document.createElement("div");
-    el.className="card"; el.setAttribute("data-code",g.code); el.setAttribute("role","button"); el.setAttribute("tabindex","0");
+    el.className="card"; el.setAttribute("data-code",g.code); el.setAttribute("role","button"); el.setAttribute("tabindex","0"); el.title=(LANG==="zh"?g.name_zh:g.name_en);
     el.innerHTML=`<div class="title">${LANG==="zh"?g.name_zh:g.name_en}</div>
-      <div class="meta"><span class="mini">${miniLabel(g.model,g.freq)}</span>
+      <div class="meta"><span class="mini" title="${miniLabel(g.model,g.freq)}">${miniLabel(g.model,g.freq)}</span>
         <span class="badge" data-i18n="next_draw">${t("next_draw")}:</span>
         <span class="countdown" data-ctr="${g.code}">--:--</span></div>
       <div class="badges" id="badges-${g.code}"></div>
@@ -87,8 +87,13 @@ function renderLobby(){
   });
   applyI18N();
 }
-document.getElementById("grid-games").addEventListener("click",(e)=>{ const card=e.target.closest?.(".card"); if(!card) return; const code=card.getAttribute("data-code"); if(code) openBetPage(code); });
-document.getElementById("grid-games").addEventListener("keydown",(e)=>{ if(e.key==="Enter"||e.key===" "){ const card=e.target.closest?.(".card"); if(!card) return; const code=card.getAttribute("data-code"); if(code) openBetPage(code); } });
+document.getElementById("grid-games").addEventListener("click",(e)=>{
+  const card=e.target.closest?.(".card"); if(!card) return;
+  const code=card.getAttribute("data-code"); if(code) openBetPage(code);
+});
+document.getElementById("grid-games").addEventListener("keydown",(e)=>{
+  if(e.key==="Enter"||e.key===" "){ const card=e.target.closest?.(".card"); if(!card) return; const code=card.getAttribute("data-code"); if(code) openBetPage(code); }
+});
 
 function formatMMSS(ms){ if(ms<0)ms=0; const s=Math.floor(ms/1000); const m=Math.floor(s/60); const sec=s%60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
 function tick(){
@@ -131,66 +136,70 @@ document.querySelectorAll(".filters .tab").forEach(btn=>{
     btn.classList.add("active"); STATE.filter=btn.getAttribute("data-filter"); renderLobby();
   });
 });
+
 function showPage(id){ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active")); const el=document.getElementById(id); if(el) el.classList.add("active"); window.scrollTo({top:0,behavior:"smooth"}); }
 document.getElementById("btn-back").addEventListener("click",()=>{ showPage("page-lobby"); history.replaceState({}, "", "#/"); });
 
 function openBetPage(code){
   const g=GAMES.find(x=>x.code===code); if(!g) return; STATE.currentGame=g;
   const title=document.getElementById("bet-title"); if(title) title.textContent=(LANG==="zh"?g.name_zh:g.name_en);
-  STATE.selection=[]; STATE.selectionBonus=null; STATE.marketTab="main"; STATE.pickMode="P1"; STATE.bonusType="BONUS_NUM";
+  const meta=document.getElementById("bet-meta"); meta.textContent=miniLabel(g.model,g.freq);
+  STATE.selection=[]; STATE.selectionBonus=null; STATE.bonusType="BONUS_NUM";
+  // restore last
+  setMarket(STATE.marketTab); setPickMode(STATE.pickMode);
+  bindSegments();
+  refreshGrid(); refreshBonusGrid(); updateNote(); updateActionState();
+  const btnQuick=document.getElementById("btn-quick"), btnClear=document.getElementById("btn-clear");
+  if(btnQuick) btnQuick.onclick=()=>{ const N=MODELS[g.model].N, need=reqCount(); const s=new Set(); while(s.size<need){ s.add(1+Math.floor(Math.random()*N)); } STATE.selection=[...s]; markGridSelection(); updateNote(); updateActionState(); };
+  if(btnClear) btnClear.onclick=()=>{ STATE.selection=[]; markGridSelection(); updateNote(); updateActionState(); };
+  const bq=document.getElementById("btn-bonus-quick"), bc=document.getElementById("btn-bonus-clear");
+  if(bq) bq.onclick=()=>{ if(STATE.bonusType!=="BONUS_NUM") return; const N=MODELS[g.model].N; STATE.selectionBonus=1+Math.floor(Math.random()*N); markBonusGrid(); updateNote(); updateActionState(); };
+  if(bc) bc.onclick=()=>{ STATE.selectionBonus=null; markBonusGrid(); updateNote(); updateActionState(); };
+  document.querySelectorAll("#bonus-oe-wrap .seg-btn").forEach(btn=> btn.onclick=()=>{ document.querySelectorAll("#bonus-oe-wrap .seg-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); STATE.selectionBonus=btn.getAttribute("data-oe"); updateNote(); updateActionState(); });
+  document.querySelectorAll("#bonus-hl-wrap .seg-btn").forEach(btn=> btn.onclick=()=>{ document.querySelectorAll("#bonus-hl-wrap .seg-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); STATE.selectionBonus=btn.getAttribute("data-hl"); updateNote(); updateActionState(); });
+  const add=document.getElementById("btn-add-slip"), submit=document.getElementById("btn-submit");
+  if(add) add.onclick=()=>{ addToSlip(); updateActionState(); toast(t('added')); };
+  if(submit) submit.onclick=()=>{ if(confirm(t('confirm_submit'))){ submitBets(); updateActionState(); } };
+  // stake chips
+  document.querySelectorAll(".chip").forEach(c=> c.addEventListener("click",()=>{ const v=parseInt(c.getAttribute("data-amt"),10); const input=document.getElementById("stake"); if(input){ input.value=v; } }));
+  // keyboard shortcuts
+  window.onkeydown=(e)=>{
+    if(document.getElementById("page-bet").classList.contains("active")){
+      if(e.key==="q"||e.key==="Q"){ if(STATE.marketTab==="main"){btnQuick?.click();} else {bq?.click();} }
+      if(e.key==="c"||e.key==="C"){ if(STATE.marketTab==="main"){btnClear?.click();} else {bc?.click();} }
+      if(e.key==="a"||e.key==="A"){ document.getElementById("btn-add-slip").click(); }
+      if(e.key==="s"||e.key==="S"){ document.getElementById("btn-submit").click(); }
+      if(e.key==="b"||e.key==="B"){ document.getElementById("btn-back").click(); }
+    }
+  };
+  showPage("page-bet"); history.replaceState({}, "", "#/game/"+code);
+}
+
+function bindSegments(){
   const segMarket=document.getElementById("seg-market");
   if(segMarket){
     segMarket.querySelectorAll(".seg-btn").forEach(btn=>{
-      btn.classList.toggle("active", btn.getAttribute("data-market")==="main");
-      btn.onclick=()=>{
-        segMarket.querySelectorAll(".seg-btn").forEach(b=>b.classList.remove("active"));
-        btn.classList.add("active");
-        const tab=btn.getAttribute("data-market"); STATE.marketTab=tab;
-        document.getElementById("main-panel").style.display=(tab==="main")?"block":"none";
-        document.getElementById("bonus-panel").style.display=(tab==="bonus")?"block":"none";
-        updateNote();
-      };
+      btn.classList.toggle("active", btn.getAttribute("data-market")===STATE.marketTab);
+      btn.onclick=()=>{ segMarket.querySelectorAll(".seg-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); STATE.marketTab=btn.getAttribute("data-market"); localStorage.setItem("lastMarketTab",STATE.marketTab); document.getElementById("main-panel").style.display=(STATE.marketTab==="main")?"block":"none"; document.getElementById("bonus-panel").style.display=(STATE.marketTab==="bonus")?"block":"none"; updateNote(); updateActionState(); };
     });
   }
   const segPick=document.getElementById("seg-pick");
   if(segPick){
     segPick.querySelectorAll(".seg-btn").forEach(btn=>{
-      btn.classList.toggle("active", btn.getAttribute("data-pick")==="P1");
-      btn.onclick=()=>{
-        segPick.querySelectorAll(".seg-btn").forEach(b=>b.classList.remove("active"));
-        btn.classList.add("active"); STATE.pickMode=btn.getAttribute("data-pick");
-        if(STATE.selection.length>reqCount()) STATE.selection=[];
-        updateNote(); refreshGrid();
-      };
+      btn.classList.toggle("active", btn.getAttribute("data-pick")===STATE.pickMode);
+      btn.onclick=()=>{ segPick.querySelectorAll(".seg-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); STATE.pickMode=btn.getAttribute("data-pick"); localStorage.setItem("lastPickMode",STATE.pickMode); if(STATE.selection.length>reqCount()) STATE.selection=[]; updateNote(); refreshGrid(); updateActionState(); };
     });
   }
   const segBonus=document.getElementById("seg-bonus-type");
   if(segBonus){
     segBonus.querySelectorAll(".seg-btn").forEach(btn=>{
       btn.classList.toggle("active", btn.getAttribute("data-bonus")==="BONUS_NUM");
-      btn.onclick=()=>{
-        segBonus.querySelectorAll(".seg-btn").forEach(b=>b.classList.remove("active"));
-        btn.classList.add("active"); STATE.bonusType=btn.getAttribute("data-bonus");
-        document.getElementById("bonus-num-wrap").style.display=(STATE.bonusType==="BONUS_NUM")?"block":"none";
-        document.getElementById("bonus-oe-wrap").style.display=(STATE.bonusType==="BONUS_OE")?"block":"none";
-        document.getElementById("bonus-hl-wrap").style.display=(STATE.bonusType==="BONUS_HL")?"block":"none";
-        STATE.selectionBonus=null; updateNote();
-      };
+      btn.onclick=()=>{ segBonus.querySelectorAll(".seg-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); STATE.bonusType=btn.getAttribute("data-bonus"); document.getElementById("bonus-num-wrap").style.display=(STATE.bonusType==="BONUS_NUM")?"block":"none"; document.getElementById("bonus-oe-wrap").style.display=(STATE.bonusType==="BONUS_OE")?"block":"none"; document.getElementById("bonus-hl-wrap").style.display=(STATE.bonusType==="BONUS_HL")?"block":"none"; STATE.selectionBonus=null; updateNote(); updateActionState(); };
     });
   }
-  refreshGrid(); refreshBonusGrid();
-  const btnQuick=document.getElementById("btn-quick"), btnClear=document.getElementById("btn-clear");
-  if(btnQuick) btnQuick.onclick=()=>{ const N=MODELS[g.model].N, need=reqCount(); const s=new Set(); while(s.size<need){ s.add(1+Math.floor(Math.random()*N)); } STATE.selection=[...s]; markGridSelection(); updateNote(); };
-  if(btnClear) btnClear.onclick=()=>{ STATE.selection=[]; markGridSelection(); updateNote(); };
-  const bq=document.getElementById("btn-bonus-quick"), bc=document.getElementById("btn-bonus-clear");
-  if(bq) bq.onclick=()=>{ if(STATE.bonusType!=="BONUS_NUM") return; const N=MODELS[g.model].N; STATE.selectionBonus=1+Math.floor(Math.random()*N); markBonusGrid(); updateNote(); };
-  if(bc) bc.onclick=()=>{ STATE.selectionBonus=null; markBonusGrid(); updateNote(); };
-  document.querySelectorAll("#bonus-oe-wrap .seg-btn").forEach(btn=> btn.onclick=()=>{ document.querySelectorAll("#bonus-oe-wrap .seg-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); STATE.selectionBonus=btn.getAttribute("data-oe"); updateNote(); });
-  document.querySelectorAll("#bonus-hl-wrap .seg-btn").forEach(btn=> btn.onclick=()=>{ document.querySelectorAll("#bonus-hl-wrap .seg-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); STATE.selectionBonus=btn.getAttribute("data-hl"); updateNote(); });
-  const add=document.getElementById("btn-add-slip"), submit=document.getElementById("btn-submit");
-  if(add) add.onclick=addToSlip; if(submit) submit.onclick=submitBets;
-  renderSlip(); updateNote(); showPage("page-bet"); history.replaceState({}, "", "#/game/"+code);
 }
+function setMarket(tab){ document.getElementById("main-panel").style.display=(tab==="main")?"block":"none"; document.getElementById("bonus-panel").style.display=(tab==="bonus")?"block":"none"; STATE.marketTab=tab; }
+function setPickMode(pm){ STATE.pickMode=pm; }
 
 function reqCount(){ return {P1:1,P2:2,P3:3}[STATE.pickMode]; }
 function refreshGrid(){
@@ -202,7 +211,7 @@ function refreshGrid(){
       const v=i; const at=STATE.selection.indexOf(v);
       if(at>=0){ STATE.selection.splice(at,1); el.classList.remove("active"); }
       else { const need=reqCount(); if(STATE.selection.length>=need) return; STATE.selection.push(v); el.classList.add("active"); }
-      updateNote();
+      updateNote(); updateActionState();
     });
     grid.appendChild(el);
   }
@@ -215,7 +224,7 @@ function refreshBonusGrid(){
   const g=STATE.currentGame; if(!g) return; const N=MODELS[g.model].N;
   for(let i=1;i<=N;i++){
     const el=document.createElement("div"); el.className="ball"; el.textContent=i;
-    el.addEventListener("click",()=>{ STATE.selectionBonus=i; markBonusGrid(); updateNote(); });
+    el.addEventListener("click",()=>{ STATE.selectionBonus=i; markBonusGrid(); updateNote(); updateActionState(); });
     grid.appendChild(el);
   }
   markBonusGrid();
@@ -224,7 +233,6 @@ function refreshBonusGrid(){
   const bonusTab=document.querySelector('[data-market="bonus"]'); if(bonusTab) bonusTab.style.display=hasB?"inline-block":"none";
 }
 function markBonusGrid(){ document.querySelectorAll("#bonus-grid .ball").forEach(el=>{ const v=parseInt(el.textContent,10); el.classList.toggle("active", STATE.selectionBonus===v); }); }
-
 function updateNote(){
   const note=document.getElementById("bet-note"); if(!note) return;
   if(STATE.marketTab==="main"){
@@ -239,35 +247,46 @@ function updateNote(){
     note.textContent=`(${t("market_bonus")} • ${t(label)}: ${choice})`;
   }
 }
-
+function updateActionState(){
+  const add=document.getElementById("btn-add-slip");
+  const submit=document.getElementById("btn-submit");
+  let valid=false;
+  if(STATE.marketTab==="main"){ valid = STATE.selection.length===reqCount(); }
+  else{
+    if(STATE.bonusType==="BONUS_NUM"){ valid = !!STATE.selectionBonus; }
+    else if(STATE.bonusType==="BONUS_OE"||STATE.bonusType==="BONUS_HL"){ valid = !!STATE.selectionBonus; }
+  }
+  if(add){ add.disabled=!valid; }
+  if(submit){ submit.disabled = STATE.slip.length===0; }
+}
 function renderSlip(){
   const ul=document.getElementById("slip-list"); if(!ul) return; ul.innerHTML="";
-  if(!STATE.slip.length){ const li=document.createElement("li"); li.textContent=t("slip_empty"); ul.appendChild(li); return; }
+  if(!STATE.slip.length){ const li=document.createElement("li"); li.textContent=t("slip_empty"); ul.appendChild(li); updateActionState(); return; }
   STATE.slip.forEach((s,idx)=>{
-    const type = (typeof s.type==="string") ? s.type : "";
-    const isPick = (type && type.startsWith && type.startsWith("P"));
+    const type=(typeof s.type==="string")?s.type:"";
+    const isPick=(type && type.startsWith && type.startsWith("P"));
     const name=(LANG==="zh"?(s.game?.name_zh||"未知彩種"):(s.game?.name_en||"Unknown Game"));
-    const detail=isPick ? (Array.isArray(s.numbers)?s.numbers.join(", "):"") : (s.detail||"");
-    const code = s.game?.code || "UNKNOWN";
-    const stake = Number(s.stake||0);
+    const detail=isPick?(Array.isArray(s.numbers)?s.numbers.join(", "):""):(s.detail||"");
+    const code=s.game?.code||"UNKNOWN";
+    const stake=Number(s.stake||0);
     const li=document.createElement("li");
     li.innerHTML=`<span>[${code}] ${name} — ${type||"TYPE"} — ${detail} — R${stake}</span>
                   <button class="btn small ghost" data-idx="${idx}">x</button>`;
     li.querySelector("button").addEventListener("click",(e)=>{ const i=parseInt(e.currentTarget.getAttribute("data-idx"),10); STATE.slip.splice(i,1); saveLocal(); renderSlip(); });
     ul.appendChild(li);
   });
-  syncDrawerSlips();
+  syncDrawerSlips(); updateActionState();
 }
 function syncDrawerSlips(){
   const ul=document.getElementById("drawer-slip-list"); if(!ul) return; ul.innerHTML="";
   if(!STATE.slip.length){ const li=document.createElement("li"); li.textContent=t("slip_empty"); ul.appendChild(li); return; }
   STATE.slip.forEach((s)=>{
-    const type = (typeof s.type==="string") ? s.type : "";
-    const isPick = (type && type.startsWith && type.startsWith("P"));
+    const type=(typeof s.type==="string")?s.type:"";
+    const isPick=(type && type.startsWith && type.startsWith("P"));
     const name=(LANG==="zh"?(s.game?.name_zh||"未知彩種"):(s.game?.name_en||"Unknown Game"));
-    const detail=isPick ? (Array.isArray(s.numbers)?s.numbers.join(", "):"") : (s.detail||"");
-    const code = s.game?.code || "UNKNOWN";
-    const stake = Number(s.stake||0);
+    const detail=isPick?(Array.isArray(s.numbers)?s.numbers.join(", "):""):(s.detail||"");
+    const code=s.game?.code||"UNKNOWN";
+    const stake=Number(s.stake||0);
     const li=document.createElement("li");
     li.innerHTML=`<span>[${code}] ${name} — ${type||"TYPE"} — ${detail} — R${stake}</span>`;
     ul.appendChild(li);
